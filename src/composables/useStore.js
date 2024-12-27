@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { auth, board, list, card } from '../api';
-import { setAuthInHeader } from '../api';
+import { auth, board, list, card } from '@/api';
+import { setAuthInHeader } from '@/api';
 
 export const useStore = defineStore('main', {
   state: () => ({

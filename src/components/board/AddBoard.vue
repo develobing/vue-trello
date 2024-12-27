@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { useStore } from '@/store/useStore';
+import { useStore } from '@/composables/useStore';
 import { useRouter } from 'vue-router';
 import Modal from '../common/Modal.vue';
 

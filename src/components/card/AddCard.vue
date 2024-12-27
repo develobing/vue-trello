@@ -21,7 +21,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from '@/store/useStore';
+import { useStore } from '@/composables/useStore';
 
 const emit = defineEmits(['close']);
 

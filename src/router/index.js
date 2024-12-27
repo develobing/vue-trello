@@ -4,7 +4,7 @@ import Login from '../pages/Login.vue';
 import Board from '../pages/Board.vue';
 import Card from '../pages/Card.vue';
 import NotFound from '../pages/NotFound.vue';
-import { useStore } from '../store/useStore';
+import { useStore } from '../composables/useStore';
 
 const requireAuth = () => (from, to, next) => {
   const store = useStore();

@@ -11,13 +11,24 @@
 </template>
 
 <script setup>
-import { useStore } from '@/store/useStore';
-import { computed } from 'vue';
+import { useStore } from '@/composables/useStore';
+import { computed, onMounted, onUpdated } from 'vue';
 import { useRouter } from 'vue-router';
+import { useTheme } from '@/composables/useTheme';
 
 const router = useRouter();
 const store = useStore();
+const { updateTheme } = useTheme();
+
 const isLoggedIn = computed(() => store.accessToken);
+
+onMounted(() => {
+  updateTheme();
+});
+
+onUpdated(() => {
+  updateTheme();
+});
 </script>
 
 <style>

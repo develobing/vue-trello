@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUpdated } from 'vue';
-import { useStore } from '@/store/useStore';
+import { useStore } from '@/composables/useStore';
 import AddBoard from '../components/board/AddBoard.vue';
 
 // Store 연결

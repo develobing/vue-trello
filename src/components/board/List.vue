@@ -47,7 +47,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { useStore } from '@/store/useStore';
+import { useStore } from '@/composables/useStore';
 import CardItem from '../card/CardItem.vue';
 import AddCard from '../card/AddCard.vue';
 

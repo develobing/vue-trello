@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { useStore } from '@/store/useStore';
+import { useStore } from '@/composables/useStore';
 
 // Props 정의
 const { card, boardId } = defineProps(['card', 'boardId']);

@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <!-- <board-settings v-if="isShowBoardMenu" /> -->
+        <BoardSettings v-if="isShowBoardMenu" />
         <router-view :boardId="board.id"></router-view>
       </div>
     </div>
@@ -48,18 +48,28 @@
 </template>
 
 <script setup>
-import { useStore } from '@/store/useStore';
-import { computed, nextTick, onMounted, onUpdated, ref, watch } from 'vue';
-import List from '../components/board/List.vue';
+import { useStore } from '@/composables/useStore';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  onUpdated,
+  ref,
+  watch,
+} from 'vue';
+import List from '@/components/board/List.vue';
 // import AddList from "./AddList.vue";
-// import BoardSettings from "./BoardSettings.vue";
+import BoardSettings from '@/components/board/BoardSettings.vue';
 import 'dragula/dist/dragula.css';
 import { useRoute } from 'vue-router';
 import dragger from '@/utils/dragger';
+import { useTheme } from '@/composables/useTheme';
 
 // Store 연결
 const store = useStore();
 const route = useRoute();
+const { updateTheme } = useTheme();
 
 // 상태 및 변수 선언
 const cardDragger = ref(null);
@@ -77,7 +87,12 @@ const updateBoard = store.UPDATE_BOARD;
 const updateCard = store.UPDATE_CARD;
 const updateList = store.UPDATE_LIST;
 const setIsShowBoardMenu = store.SET_IS_SHOW_BOARD_MENU;
-const setTheme = store.SET_THEME;
+
+// 테마 세팅
+const setTheme = (bgColor) => {
+  store.SET_THEME(bgColor);
+  updateTheme();
+};
 
 // 드래그 세팅
 const setDraggable = () => {
@@ -206,6 +221,10 @@ onUpdated(() => {
   setDraggable();
 });
 
+onBeforeUnmount(() => {
+  setTheme(null);
+});
+
 watch(() => route, fetchData);
 </script>
 
@@ -254,6 +273,7 @@ watch(() => route, fetchData);
   font-size: 14px;
   position: absolute;
   right: 15px;
+  top: 5px;
 }
 
 .list-section-wrapper {

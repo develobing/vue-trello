@@ -38,7 +38,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { useStore } from '@/store/useStore';
+import { useStore } from '@/composables/useStore';
 import { useRoute, useRouter } from 'vue-router';
 
 const store = useStore();
