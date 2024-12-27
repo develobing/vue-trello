@@ -35,7 +35,7 @@
             ></List>
 
             <div class="list-wrapper">
-              <!-- <add-list /> -->
+              <AddList />
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@ import {
   watch,
 } from 'vue';
 import List from '@/components/board/List.vue';
-// import AddList from "./AddList.vue";
+import AddList from '@/components/board/AddList.vue';
 import BoardSettings from '@/components/board/BoardSettings.vue';
 import 'dragula/dist/dragula.css';
 import { useRoute } from 'vue-router';
