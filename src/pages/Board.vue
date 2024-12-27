@@ -53,17 +53,17 @@ import { computed, nextTick, onMounted, onUpdated, ref, watch } from 'vue';
 import List from '../components/board/List.vue';
 // import AddList from "./AddList.vue";
 // import BoardSettings from "./BoardSettings.vue";
-import dragula from 'dragula';
 import 'dragula/dist/dragula.css';
 import { useRoute } from 'vue-router';
+import dragger from '@/utils/dragger';
 
 // Store 연결
 const store = useStore();
 const route = useRoute();
 
 // 상태 및 변수 선언
-const drakeList = ref(null);
-const drake = ref(null);
+const cardDragger = ref(null);
+const listDragger = ref(null);
 const isEditTitle = ref(false);
 const inputTitle = ref('');
 const inputTitleRef = ref(null);
@@ -78,6 +78,91 @@ const updateCard = store.UPDATE_CARD;
 const updateList = store.UPDATE_LIST;
 const setIsShowBoardMenu = store.SET_IS_SHOW_BOARD_MENU;
 const setTheme = store.SET_THEME;
+
+// 드래그 세팅
+const setDraggable = () => {
+  setCardDraggable();
+  setListDraggable();
+};
+
+// 카드 드래그 세팅
+const setCardDraggable = () => {
+  // 기존 카드 Dragger 제거
+  if (cardDragger.value) cardDragger.value.destroy();
+
+  // 카드 Dragger 초기화
+  const cardContainer = document.querySelectorAll('.card-list');
+  cardDragger.value = dragger.init(cardContainer);
+
+  // 카드 Dragger 이벤트 핸들러
+  cardDragger.value.on('drop', (el, wrapper) => {
+    const candidates = Array.from(wrapper.querySelectorAll('.card-item'));
+    const target = {
+      id: Number(el.dataset.cardId),
+      listId: Number(wrapper.dataset.listId),
+      pos: 65535,
+    };
+
+    const { prev, next } = dragger.sibling({
+      el,
+      wrapper,
+      candidates,
+      type: 'card',
+    });
+
+    target.pos =
+      prev && next
+        ? (prev.pos + next.pos) / 2
+        : prev
+        ? prev.pos * 2
+        : next.pos / 2;
+    updateCard(target);
+  });
+};
+
+// 리스트 드래그 세팅
+const setListDraggable = () => {
+  // 기존 리스트 Dragger 제거
+  if (listDragger.value) listDragger.value.destroy();
+
+  // 리스트 Dragger 초기화
+  const listContainer = document.querySelectorAll('.list-section');
+  listDragger.value = dragger.init(listContainer);
+
+  // 리스트 Dragger 이벤트 핸들러
+  listDragger.value.on('drop', (el, wrapper, target, siblings) => {
+    const targetList = { id: Number(el.dataset.listId), pos: 65535 };
+    let prevList = null;
+    let nextList = null;
+
+    const lists = Array.from(wrapper.querySelectorAll('.list-wrapper'));
+    lists.forEach((list, idx) => {
+      if (list === el) {
+        prevList =
+          idx > 0
+            ? {
+                id: Number(lists[idx - 1].dataset.listId),
+                pos: Number(lists[idx - 1].dataset.listPos),
+              }
+            : null;
+        nextList =
+          idx < lists.length - 1
+            ? {
+                id: Number(lists[idx + 1].dataset.listId),
+                pos: Number(lists[idx + 1].dataset.listPos),
+              }
+            : null;
+      }
+    });
+    targetList.pos =
+      prevList && nextList
+        ? (prevList?.pos + nextList?.pos) / 2
+        : prevList
+        ? prevList?.pos * 2
+        : nextList?.pos / 2;
+    updateList(targetList);
+  });
+};
 
 // 데이터 fetch 함수
 const fetchData = async () => {
@@ -109,99 +194,16 @@ const onClickShowMenu = () => {
   setIsShowBoardMenu(true);
 };
 
-// dragula 초기화
-const initDragula = () => {
-  if (drakeList.value) drakeList.value.destroy();
-  if (drake.value) drake.value.destroy();
-
-  drakeList.value = dragula([...document.querySelectorAll('.list-section')], {
-    invalid: (el, handle) => !/^list/.test(handle.className),
-  }).on('drop', (el, wrapper, target, siblings) => {
-    const targetList = { id: Number(el.dataset.listId), pos: 65535 };
-    let prevList = null;
-    let nextList = null;
-
-    const lists = Array.from(wrapper.querySelectorAll('.list-wrapper'));
-
-    lists.forEach((list, idx) => {
-      if (list === el) {
-        prevList =
-          idx > 0
-            ? {
-                id: Number(lists[idx - 1].dataset.listId),
-                pos: Number(lists[idx - 1].dataset.listPos),
-              }
-            : null;
-        nextList =
-          idx < lists.length - 1
-            ? {
-                id: Number(lists[idx + 1].dataset.listId),
-                pos: Number(lists[idx + 1].dataset.listPos),
-              }
-            : null;
-      }
-    });
-    targetList.pos =
-      prevList && nextList
-        ? (prevList?.pos + nextList?.pos) / 2
-        : prevList
-        ? prevList?.pos * 2
-        : nextList?.pos / 2;
-    updateList(targetList);
-  });
-
-  drake.value = dragula([...document.querySelectorAll('.card-list')]).on(
-    'drop',
-    (el, wrapper) => {
-      const targetCard = {
-        id: Number(el.dataset.cardId),
-        listId: Number(wrapper.dataset.listId),
-        pos: 65535,
-      };
-      let prevCard = null;
-      let nextCard = null;
-
-      const cards = Array.from(wrapper.querySelectorAll('.card-item'));
-      cards.forEach((card, idx) => {
-        if (card === el) {
-          prevCard =
-            idx > 0
-              ? {
-                  id: Number(cards[idx - 1].dataset.cardId),
-                  pos: Number(cards[idx - 1].dataset.cardPos),
-                }
-              : null;
-          nextCard =
-            idx < cards.length - 1
-              ? {
-                  id: Number(cards[idx + 1].dataset.cardId),
-                  pos: Number(cards[idx + 1].dataset.cardPos),
-                }
-              : null;
-        }
-      });
-
-      targetCard.pos =
-        prevCard && nextCard
-          ? (prevCard.pos + nextCard.pos) / 2
-          : prevCard
-          ? prevCard.pos * 2
-          : nextCard.pos / 2;
-      updateCard(targetCard);
-    }
-  );
-};
-
 // 라이프사이클 훅
 onMounted(async () => {
   await fetchData();
   inputTitle.value = board.value.title;
   setTheme(board.value.bgColor);
-  initDragula();
+  setDraggable();
 });
 
 onUpdated(() => {
-  initDragula();
+  setDraggable();
 });
 
 watch(() => route, fetchData);
